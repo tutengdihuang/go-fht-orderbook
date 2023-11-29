@@ -78,7 +78,7 @@ func TestBSTMinMax(t *testing.T) {
 func TestBSTMinMaxCachedOnDelete(t *testing.T) {
 	st := NewBST()
 	for i := 0; i < 100; i += 1 {
-		st.Put(decimal.NewFromInt(int64(100-i)), nil)
+		st.Put(decimal.NewFromFloat(100.0-float64(i)), nil)
 	}
 
 	min := decimal.NewFromInt(1.0)
@@ -91,9 +91,9 @@ func TestBSTMinMaxCachedOnDelete(t *testing.T) {
 		t.Errorf("min %+v != %+v", st.Max(), max)
 	}
 	st.Delete(max)
-	max = decimal.NewFromFloat(99.0)
-	if !st.Max().Equal(max) {
-		t.Errorf("min %+v != %+v", st.Max(), max)
+	max1 := decimal.NewFromFloat(99.0)
+	if !st.Max().Equal(max1) {
+		t.Errorf("min %+v != %+v", st.Max(), max1)
 	}
 	if st.Size() != 99 {
 		t.Errorf("size should be 99")
@@ -120,18 +120,21 @@ func TestBSTMinMaxCachedOnDelete(t *testing.T) {
 func TestBSTFloor(t *testing.T) {
 	st := NewBST()
 	for i := 0; i < 10; i += 1 {
-		k := decimal.NewFromInt(int64(20 - 2*i))
+		k := decimal.NewFromFloat(20 - float64(2*i))
 		st.Put(k, nil)
 	}
 
 	keymiss := decimal.NewFromFloat(3.0)
 	flmiss := decimal.NewFromFloat(2.0)
-	if st.Floor(keymiss) != flmiss {
-		t.Errorf("floor != %s", flmiss.String())
+	if !st.Floor(keymiss).Equal(flmiss) {
+		t.Errorf("floor = %+v", flmiss)
+		t.Errorf("keymiss: %+v", keymiss)
+		t.Errorf("flmiss: %+v", flmiss)
+		t.Errorf("st.Floor = %+v", st.Floor(keymiss))
 	}
 
 	keyhit := decimal.NewFromFloat(10.0)
-	if st.Floor(keyhit) != keyhit {
+	if !st.Floor(keyhit).Equal(keyhit) {
 		t.Errorf("floor != %s", keyhit.String())
 	}
 }
@@ -145,12 +148,12 @@ func TestBSTCeiling(t *testing.T) {
 
 	keymiss := decimal.NewFromFloat(3.0)
 	clmiss := decimal.NewFromFloat(4.0)
-	if st.Ceiling(keymiss) != clmiss {
-		t.Errorf("ceiling != %s", clmiss.String())
+	if !st.Ceiling(keymiss).Equal(clmiss) {
+		t.Errorf("ceilißng != %s", clmiss.String())
 	}
 
 	keyhit := decimal.NewFromFloat(10.0)
-	if st.Ceiling(keyhit) != keyhit {
+	if !st.Ceiling(keyhit).Equal(keyhit) {
 		t.Errorf("ceiling != %s", keyhit.String())
 	}
 }
@@ -163,12 +166,12 @@ func TestBSTSelect(t *testing.T) {
 	}
 
 	key := decimal.NewFromFloat(3.0)
-	if st.Select(2) != key {
+	if !st.Select(2).Equal(key) {
 		t.Errorf("element with rank=2 should be %s", key.String())
 	}
 
 	key = decimal.NewFromFloat(10.0)
-	if st.Select(9) != key {
+	if !st.Select(9).Equal(key) {
 		t.Errorf("element with rank=9 should be %s", key.String())
 	}
 }

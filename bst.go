@@ -373,7 +373,7 @@ func (t *bst) delete(n *nodeBST, key decimal.Decimal) *nodeBST {
 		return nil
 	}
 
-	if n.Key == key {
+	if n.Key.Equal(key) {
 		// search hit
 
 		// updating linked list
@@ -430,7 +430,7 @@ func (t *bst) keys(n *nodeBST, lo, hi decimal.Decimal) []decimal.Decimal {
 		return nil
 	}
 
-	if n.Key.LessThan(t.Max()) {
+	if n.Key.LessThan(lo) {
 		return t.keys(n.right, lo, hi)
 	} else if n.Key.GreaterThan(hi) {
 		return t.keys(n.left, lo, hi)
