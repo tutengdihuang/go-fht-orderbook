@@ -62,7 +62,7 @@ func (t *redBlackBST) Get(key decimal.Decimal) *LimitOrder {
 
 	x := t.get(t.root, key)
 	if x == nil {
-		panic(fmt.Sprintf("key %+v does not exist", key))
+		panic(fmt.Sprintf("key %+v does not exist", key.Round(8)))
 	}
 
 	return x.Value
@@ -73,7 +73,7 @@ func (t *redBlackBST) get(n *nodeRedBlack, key decimal.Decimal) *nodeRedBlack {
 		return nil
 	}
 
-	if n.Key == key {
+	if n.Key.Equal(key) {
 		return n
 	}
 
@@ -342,7 +342,7 @@ func (t *redBlackBST) Floor(key decimal.Decimal) decimal.Decimal {
 
 	floor := t.floor(t.root, key)
 	if floor == nil {
-		panic(fmt.Sprintf("there are no keys <= %+v", key))
+		panic(fmt.Sprintf("there are no keys <= %+v", key.Round(8)))
 	}
 
 	return floor.Key
@@ -354,7 +354,7 @@ func (t *redBlackBST) floor(n *nodeRedBlack, key decimal.Decimal) *nodeRedBlack 
 		return nil
 	}
 
-	if n.Key == key {
+	if n.Key.Equal(key) {
 		// search hit
 		return n
 	}
@@ -378,7 +378,7 @@ func (t *redBlackBST) Ceiling(key decimal.Decimal) decimal.Decimal {
 
 	ceiling := t.ceiling(t.root, key)
 	if ceiling == nil {
-		panic(fmt.Sprintf("there are no keys >= %+v", key))
+		panic(fmt.Sprintf("there are no keys >= %+v", key.Round(8)))
 	}
 
 	return ceiling.Key
@@ -440,7 +440,7 @@ func (t *redBlackBST) rank(n *nodeRedBlack, key decimal.Decimal) int {
 		return 0
 	}
 
-	if n.Key == key {
+	if n.Key.Equal(key) {
 		return t.size(n.left)
 	}
 
@@ -624,7 +624,7 @@ func (t *redBlackBST) delete(n *nodeRedBlack, key decimal.Decimal) *nodeRedBlack
 			return nil
 		}
 
-		// looking into the left sub-tree
+		// looking into the left subtree
 		if !t.isRed(n.left) && !t.isRed(n.left.left) {
 			n = t.moveRedLeft(n)
 		}
@@ -632,11 +632,11 @@ func (t *redBlackBST) delete(n *nodeRedBlack, key decimal.Decimal) *nodeRedBlack
 		n.left = t.delete(n.left, key)
 
 	} else {
-		// checking current node and right sub-tree if required
+		// checking current node and right subtree if required
 		if t.isRed(n.left) {
 			n = t.rotateRight(n)
 		}
-		if n.Key == key && n.right == nil {
+		if n.Key.Equal(key) && n.right == nil {
 			// search hit and we don't have right sub-tree
 
 			// updating linked list
@@ -666,7 +666,7 @@ func (t *redBlackBST) delete(n *nodeRedBlack, key decimal.Decimal) *nodeRedBlack
 		}
 		// h.right or one of its children red make
 
-		if n.Key == key {
+		if n.Key.Equal(key) {
 			// search hit, replacing the node with a successor
 			rightMin := t.min(n.right)
 			n.Key = rightMin.Key
@@ -748,7 +748,7 @@ func (t *redBlackBST) print(n *nodeRedBlack) {
 	if n.isRed {
 		fmt.Printf("*")
 	}
-	fmt.Printf("%+v ", n.Key)
+	fmt.Printf("%+v ", n.Key.Round(8))
 
 	t.print(n.left)
 	t.print(n.right)
