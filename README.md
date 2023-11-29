@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.com/alexey-ernest/go-hft-orderbook.svg?branch=master)](https://travis-ci.com/alexey-ernest/go-hft-orderbook)
 
-# go-hft-orderbook
+# github.com/tutengdihuang/rbt_orderbook
 Golang implementation of a Limit Order Book (LOB) for high frequency trading in crypto exchanges. Inspired by [this](https://web.archive.org/web/20110219163448/http://howtohft.wordpress.com/2011/02/15/how-to-build-a-fast-limit-order-book/) article.
 
 ## Operations
