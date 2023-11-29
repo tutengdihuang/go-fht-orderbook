@@ -10,10 +10,11 @@ import (
 const MaxLimitsNum int = 10000
 
 type Orderbook struct {
-	Bids *redBlackBST
-	Asks *redBlackBST
-
+	Bids           *redBlackBST
+	Asks           *redBlackBST
+	bidLimtRwLock  sync.RWMutex
 	bidLimitsCache map[decimal.Decimal]*LimitOrder
+	askLimtRwLock  sync.RWMutex
 	askLimitsCache map[decimal.Decimal]*LimitOrder
 	pool           *sync.Pool
 }
@@ -54,6 +55,37 @@ func (this *Orderbook) getAskLimitsCacheByPrice(price decimal.Decimal) *LimitOrd
 	}
 	return limit
 }
+
+func (this *Orderbook) setBidLimitsCache(limit *LimitOrder, price decimal.Decimal) {
+	this.bidLimtRwLock.Lock()
+	defer this.bidLimtRwLock.Unlock()
+	this.bidLimitsCache[price] = limit
+}
+func (this *Orderbook) setAskLimitsCache(limit *LimitOrder, price decimal.Decimal) {
+	this.askLimtRwLock.Lock()
+	defer this.askLimtRwLock.Unlock()
+	this.askLimitsCache[price] = limit
+}
+
+func (this *Orderbook) deleteBidLimitsCache(price decimal.Decimal) {
+	for k := range this.bidLimitsCache {
+		if k.Equal(price) {
+			this.bidLimtRwLock.Lock()
+			delete(this.bidLimitsCache, k)
+			this.bidLimtRwLock.Unlock()
+		}
+	}
+}
+func (this *Orderbook) deleteAskLimitsCache(price decimal.Decimal) {
+	for k := range this.askLimitsCache {
+		if k.Equal(price) {
+			this.askLimtRwLock.Lock()
+			delete(this.askLimitsCache, k)
+			this.askLimtRwLock.Unlock()
+		}
+	}
+}
+
 func (this *Orderbook) Add(price decimal.Decimal, o *Order) {
 	var limit *LimitOrder
 
@@ -71,10 +103,10 @@ func (this *Orderbook) Add(price decimal.Decimal, o *Order) {
 		// insert into the corresponding BST and cache
 		if o.BidOrAsk {
 			this.Bids.Put(price, limit)
-			this.bidLimitsCache[price] = limit
+			this.setBidLimitsCache(limit, price)
 		} else {
 			this.Asks.Put(price, limit)
-			this.askLimitsCache[price] = limit
+			this.setAskLimitsCache(limit, price)
 		}
 	}
 
@@ -90,10 +122,10 @@ func (this *Orderbook) Cancel(o *Order) {
 		// remove the limit if there are no orders
 		if o.BidOrAsk {
 			this.Bids.Delete(limit.Price)
-			delete(this.bidLimitsCache, limit.Price)
+			this.deleteBidLimitsCache(limit.Price)
 		} else {
 			this.Asks.Delete(limit.Price)
-			delete(this.askLimitsCache, limit.Price)
+			this.deleteAskLimitsCache(limit.Price)
 		}
 
 		// put it back to the pool
@@ -112,9 +144,9 @@ func (this *Orderbook) ClearAskLimit(price decimal.Decimal) {
 func (this *Orderbook) clearLimit(price decimal.Decimal, bidOrAsk bool) {
 	var limit *LimitOrder
 	if bidOrAsk {
-		limit = this.bidLimitsCache[price]
+		limit = this.getBidLimitsCacheByPrice(price)
 	} else {
-		limit = this.askLimitsCache[price]
+		limit = this.getAskLimitsCacheByPrice(price)
 	}
 
 	if limit == nil {
@@ -125,13 +157,13 @@ func (this *Orderbook) clearLimit(price decimal.Decimal, bidOrAsk bool) {
 }
 
 func (this *Orderbook) DeleteBidLimit(price decimal.Decimal) {
-	limit := this.bidLimitsCache[price]
+	limit := this.getBidLimitsCacheByPrice(price)
 	if limit == nil {
 		return
 	}
 
 	this.deleteLimit(price, true)
-	delete(this.bidLimitsCache, price)
+	this.deleteBidLimitsCache(price)
 
 	// put limit back to the pool
 	limit.Clear()
@@ -140,13 +172,13 @@ func (this *Orderbook) DeleteBidLimit(price decimal.Decimal) {
 }
 
 func (this *Orderbook) DeleteAskLimit(price decimal.Decimal) {
-	limit := this.askLimitsCache[price]
+	limit := this.getAskLimitsCacheByPrice(price)
 	if limit == nil {
 		return
 	}
 
 	this.deleteLimit(price, false)
-	delete(this.askLimitsCache, price)
+	this.deleteAskLimitsCache(price)
 
 	// put limit back to the pool
 	limit.Clear()
