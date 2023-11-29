@@ -1,4 +1,4 @@
-module rbt_orderbook
+module github.com/tutengdihuang/rbt_orderbook
 
 go 1.21.0
 
