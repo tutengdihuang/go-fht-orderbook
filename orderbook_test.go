@@ -104,8 +104,12 @@ func TestGetVolumeAtLimit(t *testing.T) {
 	}
 	b.Add(decimal.NewFromFloat(1.0), bid1)
 	b.Add(decimal.NewFromFloat(1.0), bid2)
-	if b.GetVolumeAtBidLimit(decimal.NewFromFloat(1.0)).Sub(decimal.NewFromFloat(0.3)).Abs().GreaterThan(decimal.NewFromFloat(0.0000001)) {
+	getVolume := b.GetVolumeAtBidLimit(decimal.NewFromFloat(1.0))
+	subAbs := getVolume.Sub(decimal.NewFromFloat(0.3)).Abs()
+	if subAbs.GreaterThan(decimal.NewFromFloat(0.0000001)) {
 		t.Errorf("invalid volume at limit: %+v", b.GetVolumeAtBidLimit(decimal.NewFromFloat(1.0)))
+		t.Errorf("getVolume: %+v", getVolume)
+		t.Errorf("subAbs: %+v", subAbs)
 	}
 }
 

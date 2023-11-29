@@ -23,6 +23,8 @@ func TestLimitOrderAddOrder(t *testing.T) {
 
 	if l.TotalVolume().Cmp(volume) != 0 {
 		t.Errorf("total volume counted incorrectly")
+		t.Errorf("tl.TotalVolume():%+v", l.TotalVolume())
+		t.Errorf("volume:%+v", volume)
 	}
 	if l.Size() != 1 {
 		t.Errorf("it should have size = 1")

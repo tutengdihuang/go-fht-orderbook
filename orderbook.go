@@ -35,14 +35,32 @@ func NewOrderbook() Orderbook {
 		},
 	}
 }
+func (this *Orderbook) getBidLimitsCacheByPrice(price decimal.Decimal) *LimitOrder {
+	var limit *LimitOrder
+	for k := range this.bidLimitsCache {
+		if k.Equal(price) {
+			limit = this.bidLimitsCache[k]
+		}
+	}
+	return limit
+}
 
+func (this *Orderbook) getAskLimitsCacheByPrice(price decimal.Decimal) *LimitOrder {
+	var limit *LimitOrder
+	for k := range this.askLimitsCache {
+		if k.Equal(price) {
+			limit = this.askLimitsCache[k]
+		}
+	}
+	return limit
+}
 func (this *Orderbook) Add(price decimal.Decimal, o *Order) {
 	var limit *LimitOrder
 
 	if o.BidOrAsk {
-		limit = this.bidLimitsCache[price]
+		limit = this.getBidLimitsCacheByPrice(price)
 	} else {
-		limit = this.askLimitsCache[price]
+		limit = this.getAskLimitsCacheByPrice(price)
 	}
 
 	if limit == nil {
@@ -144,7 +162,7 @@ func (this *Orderbook) deleteLimit(price decimal.Decimal, bidOrAsk bool) {
 }
 
 func (this *Orderbook) GetVolumeAtBidLimit(price decimal.Decimal) decimal.Decimal {
-	limit := this.bidLimitsCache[price]
+	limit := this.getBidLimitsCacheByPrice(price)
 	if limit == nil {
 		return decimal.Zero
 	}
@@ -152,7 +170,7 @@ func (this *Orderbook) GetVolumeAtBidLimit(price decimal.Decimal) decimal.Decima
 }
 
 func (this *Orderbook) GetVolumeAtAskLimit(price decimal.Decimal) decimal.Decimal {
-	limit := this.askLimitsCache[price]
+	limit := this.getAskLimitsCacheByPrice(price)
 	if limit == nil {
 		return decimal.Zero
 	}

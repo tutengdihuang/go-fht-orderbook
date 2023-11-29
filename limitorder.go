@@ -15,8 +15,9 @@ type LimitOrder struct {
 func NewLimitOrder(price decimal.Decimal) LimitOrder {
 	q := NewOrdersQueue()
 	return LimitOrder{
-		Price:  price,
-		orders: &q,
+		Price:       price,
+		orders:      &q,
+		totalVolume: decimal.NewFromFloat(0.0),
 	}
 }
 
@@ -31,7 +32,7 @@ func (this *LimitOrder) Size() int {
 func (this *LimitOrder) Enqueue(o *Order) {
 	this.orders.Enqueue(o)
 	o.Limit = this
-	this.totalVolume.Add(o.Volume)
+	this.totalVolume = this.totalVolume.Add(o.Volume)
 }
 
 func (this *LimitOrder) Dequeue() *Order {
@@ -40,7 +41,7 @@ func (this *LimitOrder) Dequeue() *Order {
 	}
 
 	o := this.orders.Dequeue()
-	this.totalVolume.Sub(o.Volume)
+	this.totalVolume = this.totalVolume.Sub(o.Volume)
 	return o
 }
 
@@ -51,7 +52,7 @@ func (this *LimitOrder) Delete(o *Order) {
 
 	this.orders.Delete(o)
 	o.Limit = nil
-	this.totalVolume.Sub(o.Volume)
+	this.totalVolume = this.totalVolume.Sub(o.Volume)
 }
 
 func (this *LimitOrder) Clear() {

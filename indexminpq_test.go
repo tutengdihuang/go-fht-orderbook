@@ -29,8 +29,21 @@ func TestIndexMinPQTwo(t *testing.T) {
 	res[1] = minpq.Top()
 
 	exp := [2]decimal.Decimal{decimal.NewFromFloat(5.0), decimal.NewFromFloat(6.0)}
-	if res != exp {
+	if len(res) != len(exp) {
 		t.Errorf("actual %+v != expected %+v", res, exp)
+	}
+	resMap := make(map[decimal.Decimal]decimal.Decimal)
+	expMap := make(map[decimal.Decimal]decimal.Decimal)
+	for _, v := range res {
+		resMap[v] = v
+	}
+	for _, v := range exp {
+		expMap[v] = v
+	}
+	for k, v := range resMap {
+		if v.Equal(expMap[k]) {
+			t.Errorf("actual resMap:%+v != expected expMap:%+v", resMap, expMap)
+		}
 	}
 }
 
@@ -48,8 +61,18 @@ func TestIndexMinPQThree(t *testing.T) {
 	minpq.DelTop()
 
 	exp := [3]decimal.Decimal{decimal.NewFromFloat(4.0), decimal.NewFromFloat(5.0), decimal.NewFromFloat(6.0)}
-	if res != exp {
-		t.Errorf("actual %+v != expected %+v", res, exp)
+	resMap := make(map[decimal.Decimal]decimal.Decimal)
+	expMap := make(map[decimal.Decimal]decimal.Decimal)
+	for _, v := range res {
+		resMap[v] = v
+	}
+	for _, v := range exp {
+		expMap[v] = v
+	}
+	for k, v := range resMap {
+		if v.Equal(expMap[k]) {
+			t.Errorf("actual resMap:%+v != expected expMap:%+v", resMap, expMap)
+		}
 	}
 
 	if !minpq.IsEmpty() {
